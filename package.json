@@ -1,0 +1,24 @@
+{
+  "name": "shopproject",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "migrate": "npx knex migrate:latest --knexfile db/knexfile.js",
+    "start": "nodemon index.js",
+    "server3": "nodemon test/server3.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "bcrypt": "^6.0.0",
+    "dotenv": "^17.2.0",
+    "express": "^5.1.0",
+    "joi": "^17.13.3",
+    "jsonwebtoken": "^9.0.2",
+    "knex": "^3.1.0",
+    "nodemon": "^3.1.10",
+    "pg": "^8.16.3"
+  }
+}
