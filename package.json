@@ -4,6 +4,7 @@
   "main": "index.js",
   "scripts": {
     "migrate": "npx knex migrate:latest --knexfile db/knexfile.js",
+    "migratedown": "npx knex migrate:down --knexfile db/knexfile.js",
     "start": "nodemon index.js",
     "server3": "nodemon test/server3.js"
   },
