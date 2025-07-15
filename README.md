@@ -1,6 +1,7 @@
 # Readme
 
 ```
-Basic Shop Route Project
+Added global error handling class
+ 
 
 ```
