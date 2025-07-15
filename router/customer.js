@@ -9,6 +9,6 @@ const { uservalidator } = require(`../validation/validator`);
 router.post("/signin", uservalidator, controller.createCustomer);
 
 // Login
-router.post(`/login`, uservalidator, controller.Logincustomer);
+router.post(`/`, uservalidator, controller.Logincustomer);
 
 module.exports = router;

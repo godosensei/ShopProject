@@ -1,13 +1,5 @@
 const express = require(`express`);
 const app = express();
-const db = require(`./db/db`);
-const bcrypt = require(`bcrypt`);
-const {
-  ContainerEntity,
-  ProductEntity,
-  AdminEntity,
-  CustomerEntity,
-} = require(`./dto/dto`);
 
 const ProductRoutes = require(`./router/product`);
 const ContainerRoutes = require(`./router/container`);

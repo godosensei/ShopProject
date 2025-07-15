@@ -2,18 +2,16 @@ require(`dotenv`).config();
 
 const express = require(`express`);
 const router = express.Router();
-const db = require(`../db/db`);
+const db = require(`../db/db.js`);
 const bcrypt = require(`bcrypt`);
 const jwt = require(`jsonwebtoken`);
+const BaseDb = require(`../db/basedb/basedb.js`);
 
 const refreshTokens = [];
 const { AdminEntity } = require(`../dto/dto`);
 //
 class Admin {
-  constructor(req, res) {
-    this.req = req;
-    this.res = res;
-  }
+  constructor() {}
 
   adminSignIn = async (req, res) => {
     const existingAdmins = await db("Admin").count("* as count");

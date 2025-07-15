@@ -20,13 +20,13 @@ const { uservalidator } = require(`../validation/validator`);
 router.post("/signin", uservalidator, controller.createAdmin);
 
 // Login
-router.post(`/login`, uservalidator, controller.loginAdmin);
+router.post(`/`, uservalidator, controller.loginAdmin);
 
 // Logout
-router.delete(`/logout`, controller.logoutAdmin);
+router.delete(`/`, controller.logoutAdmin);
 
 // get
-router.get(`/access`, authenticateToken, controller.getAdmin);
+router.get(`/`, authenticateToken, controller.getAdmin);
 
 //
 function authenticateToken(req, res, next) {
