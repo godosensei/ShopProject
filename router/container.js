@@ -1,16 +1,14 @@
 const express = require(`express`);
 const router = express.Router();
-const {
-  newContainer,
-  removeContainer,
-} = require(`../controller/containerController`);
+const ContainerController = require(`../controller/containerController`);
+const controller = new ContainerController();
 
 const { containerValidator } = require(`../validation/validator`);
 
 // POST route to insert container
-router.post("/", containerValidator, newContainer);
+router.post("/", containerValidator, controller.newContainer);
 
 // Delete container
-router.delete(`/:id`, containerValidator, removeContainer);
+router.delete(`/:id`, containerValidator, controller.removeContainer);
 
 module.exports = router;

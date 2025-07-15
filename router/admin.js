@@ -9,21 +9,24 @@ const {
 
 const express = require(`express`);
 const router = express.Router();
+const AdminController = require(`../controller/adminController`);
+const controller = new AdminController();
 
 const refreshTokens = [];
 
 const { uservalidator } = require(`../validation/validator`);
 
-// Post route to insert Admin
-router.post("/signin", uservalidator, createAdmin);
+// Post signin
+router.post("/signin", uservalidator, controller.createAdmin);
 
 // Login
-router.post(`/login`, uservalidator, loginAdmin);
+router.post(`/login`, uservalidator, controller.loginAdmin);
 
 // Logout
-router.delete(`/logout`, logoutAdmin);
+router.delete(`/logout`, controller.logoutAdmin);
 
-router.get(`/access`, authenticateToken, getAdmin);
+// get
+router.get(`/access`, authenticateToken, controller.getAdmin);
 
 //
 function authenticateToken(req, res, next) {

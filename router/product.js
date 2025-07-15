@@ -1,20 +1,17 @@
 const express = require(`express`);
 const router = express.Router();
-const {
-  newProduct,
-  getProductByContainer,
-  removeProduct,
-} = require(`../controller/productController`);
+const ProductController = require(`../controller/productController`);
+const controller = new ProductController();
 
 const { productvalidator } = require(`../validation/validator`);
 
 // POST route to insert product
-router.post("/", productvalidator, newProduct);
+router.post("/", productvalidator, controller.newProduct);
 
 // Get products
-router.get("/:id", getProductByContainer);
+router.get("/:id", controller.getProductByContainer);
 
 // Delete products
-router.delete("/:id", productvalidator, removeProduct);
+router.delete("/:id", productvalidator, controller.removeProduct);
 
 module.exports = router;

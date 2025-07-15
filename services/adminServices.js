@@ -8,61 +8,70 @@ const jwt = require(`jsonwebtoken`);
 
 const refreshTokens = [];
 const { AdminEntity } = require(`../dto/dto`);
+//
+class Admin {
+  constructor(req, res) {
+    this.req = req;
+    this.res = res;
+  }
 
-const adminSignIn = async (req, res) => {
-  const existingAdmins = await db("Admin").count("* as count");
-  const adminCount = parseInt(existingAdmins[0].count);
-  // check if admin exist
-  if (adminCount > 0) {
-    return res.status(400).json({
-      success: false,
-      error: "An admin already exists.",
+  adminSignIn = async (req, res) => {
+    const existingAdmins = await db("Admin").count("* as count");
+    const adminCount = parseInt(existingAdmins[0].count);
+    // check if admin exist
+    if (adminCount > 0) {
+      return res.status(400).json({
+        success: false,
+        error: "An admin already exists.",
+      });
+    }
+    // create admin if doesnt exist
+    const salt = await bcrypt.genSalt();
+    const hashedPassword = await bcrypt.hash(req.body.password, salt);
+    const admin = new AdminEntity({
+      name: req.body.name,
+      password: hashedPassword,
+      email: req.body.email,
+      role: "admin",
     });
-  }
-  // create admin if doesnt exist
-  const salt = await bcrypt.genSalt();
-  const hashedPassword = await bcrypt.hash(req.body.password, salt);
-  const admin = new AdminEntity({
-    name: req.body.name,
-    password: hashedPassword,
-    email: req.body.email,
-    role: "admin",
-  });
 
-  const [newAdmin] = await db("Admin").insert(admin).returning("*");
+    const [newAdmin] = await db("Admin").insert(admin).returning("*");
 
-  res.status(201).json({ success: true, admin: newAdmin });
-};
+    res.status(201).json({ success: true, admin: newAdmin });
+  };
 
-const adminLogin = async (req, res) => {
-  const { name, password } = req.body;
+  adminLogin = async (req, res) => {
+    const { name, password } = req.body;
 
-  // get user
-  const [user] = await db("Admin").where({ name }).select("*");
+    // get user
+    const [user] = await db("Admin").where({ name }).select("*");
 
-  if (!user) {
-    return res.status(400).send("Admin not found");
-  }
+    if (!user) {
+      return res.status(400).send("Admin not found");
+    }
 
-  // Check password
-  const valid = await bcrypt.compare(password, user.password);
-  if (!valid) return res.status(403).send("Invalid password");
+    // Check password
+    const valid = await bcrypt.compare(password, user.password);
+    if (!valid) return res.status(403).send("Invalid password");
 
-  // Create JWTs
-  const userPayload = { id: user.id, name: user.name };
-  const accessToken = generateAccessToken(userPayload);
-  const refreshToken = jwt.sign(userPayload, process.env.REFRESH_TOKEN);
-  refreshTokens.push(refreshToken);
+    // Create JWTs
+    const userPayload = { id: user.id, name: user.name };
+    const accessToken = generateAccessToken(userPayload);
+    const refreshToken = jwt.sign(userPayload, process.env.REFRESH_TOKEN);
+    refreshTokens.push(refreshToken);
 
-  res.json({ accessToken, refreshToken });
-};
+    res.json({ accessToken, refreshToken });
+  };
 
-const adminLogout = async (req, res) => {
-  const index = refreshTokens.indexOf(req.body.token);
-  if (index !== -1) refreshTokens.splice(index, 1);
+  adminLogout = async (req, res) => {
+    const index = refreshTokens.indexOf(req.body.token);
+    if (index !== -1) refreshTokens.splice(index, 1);
 
-  res.sendStatus(204);
-};
+    res.sendStatus(204);
+  };
+}
+
+//
 
 // Create Access Token
 function generateAccessToken(user) {
@@ -83,4 +92,4 @@ function authenticateToken(req, res, next) {
   });
 }
 
-module.exports = { adminSignIn, adminLogin, adminLogout };
+module.exports = Admin;

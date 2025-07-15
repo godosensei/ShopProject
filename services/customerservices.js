@@ -10,35 +10,45 @@ const refreshTokens = [];
 
 const { CustomerEntity } = require(`../dto/dto`);
 
-customerSignin = async (req, res) => {
-  const salt = await bcrypt.genSalt();
-  const hashedPassword = await bcrypt.hash(req.body.password, salt);
-  const customer = new CustomerEntity({
-    name: req.body.name,
-    password: hashedPassword,
-    email: req.body.email,
-    role: "customer",
-  });
-  const [newCustomer] = await db("Customer").insert(customer).returning("*");
-
-  res.status(201).json({ success: true, customer: newCustomer });
-};
-
-customerLogin = async (req, res) => {
-  const { name, password } = req.body;
-
-  // get user
-  const [user] = await db("Customer").where({ name }).select("*");
-
-  if (!user) {
-    return res.status(400).send("User not found");
+class Customer {
+  //
+  constructor(req, res) {
+    this.req = req;
+    this.res = res;
   }
 
-  // Check password
-  const valid = await bcrypt.compare(password, user.password);
-  if (!valid) return res.status(403).send("Invalid password");
+  //
+  customerSignin = async (req, res) => {
+    const salt = await bcrypt.genSalt();
+    const hashedPassword = await bcrypt.hash(req.body.password, salt);
+    const customer = new CustomerEntity({
+      name: req.body.name,
+      password: hashedPassword,
+      email: req.body.email,
+      role: "customer",
+    });
+    const [newCustomer] = await db("Customer").insert(customer).returning("*");
 
-  res.send(`loged in!`);
-};
+    res.status(201).json({ success: true, customer: newCustomer });
+  };
+  //
 
-module.exports = { customerSignin, customerLogin };
+  customerLogin = async (req, res) => {
+    const { name, password } = req.body;
+
+    // get user
+    const [user] = await db("Customer").where({ name }).select("*");
+
+    if (!user) {
+      return res.status(400).send("User not found");
+    }
+
+    // Check password
+    const valid = await bcrypt.compare(password, user.password);
+    if (!valid) return res.status(403).send("Invalid password");
+
+    res.send(`loged in!`);
+  };
+}
+
+module.exports = Customer;

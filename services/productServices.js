@@ -4,69 +4,73 @@ const router = express.Router();
 const db = require(`../db/db`);
 const { ProductEntity } = require(`../dto/dto`);
 
-// create
-createProduct = async (req, res) => {
-  const product = new ProductEntity(req.body);
-
-  const [newProduct] = await db("products").insert(product).returning("*");
-  const countResult = await db("products")
-    .where("container_id", product.container_id)
-    .count("* as count");
-
-  const productCount = parseInt(countResult[0].count);
-
-  await db("container")
-    .where("id", product.container_id)
-    .update({ number_of_products: productCount });
-
-  res.status(201).json({
-    success: true,
-    product: newProduct,
-    message: `Container ${product.container_id} now has ${productCount} product(s).`,
-  });
-};
-
-// Get Product
-getProduct = async (req, res) => {
-  const containerId = req.params.id;
-
-  const products = await db("products").where("container_id", containerId);
-
-  res.status(200).json({ success: true, products });
-};
-
-// delete
-deleteProduct = async (req, res) => {
-  const productId = req.params.id;
-
-  // Get product_id
-  const product = await db("products").where("id", productId).first();
-
-  if (!product) {
-    return res.status(404).json({ success: false, error: "Product not found" });
+class Product {
+  constructor(req, res) {
+    this.req = req;
+    this.res = res;
   }
+  // create
+  createProduct = async (req, res) => {
+    const product = new ProductEntity(req.body);
 
-  const containerId = product.container_id;
+    const [newProduct] = await db("products").insert(product).returning("*");
+    const countResult = await db("products")
+      .where("container_id", product.container_id)
+      .count("* as count");
 
-  // Delete product
-  await db("products").where("id", productId).del();
+    const productCount = parseInt(countResult[0].count);
 
-  // Update container product count
-  const countResult = await db("products")
-    .where("container_id", containerId)
-    .count("* as count");
+    await db("container")
+      .where("id", product.container_id)
+      .update({ number_of_products: productCount });
 
-  const productCount = parseInt(countResult[0].count);
+    res.status(201).json({
+      success: true,
+      product: newProduct,
+      message: `Container ${product.container_id} now has ${productCount} product(s).`,
+    });
+  };
 
-  await db("container")
-    .where("id", containerId)
-    .update({ number_of_products: productCount });
+  // Get Product
+  getProduct = async (req, res) => {
+    const containerId = req.params.id;
 
-  res.json({ success: true, message: "Product removed" });
-};
+    const products = await db("products").where("container_id", containerId);
 
-module.exports = {
-  createProduct,
-  deleteProduct,
-  getProduct,
-};
+    res.status(200).json({ success: true, products });
+  };
+
+  // delete
+  deleteProduct = async (req, res) => {
+    const productId = req.params.id;
+
+    // Get product_id
+    const product = await db("products").where("id", productId).first();
+
+    if (!product) {
+      return res
+        .status(404)
+        .json({ success: false, error: "Product not found" });
+    }
+
+    const containerId = product.container_id;
+
+    // Delete product
+    await db("products").where("id", productId).del();
+
+    // Update container product count
+    const countResult = await db("products")
+      .where("container_id", containerId)
+      .count("* as count");
+
+    const productCount = parseInt(countResult[0].count);
+
+    await db("container")
+      .where("id", containerId)
+      .update({ number_of_products: productCount });
+
+    res.json({ success: true, message: "Product removed" });
+  };
+}
+
+module.exports = Product;
