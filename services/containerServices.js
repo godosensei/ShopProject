@@ -4,6 +4,9 @@ const router = express.Router();
 const db = require(`../db/db`);
 const { ContainerEntity } = require(`../dto/dto`);
 
+const BaseDb = require(`../db/basedb/basedb.js`);
+const basedb = new BaseDb();
+
 //
 class Container {
   constructor(req, res) {
@@ -13,9 +16,7 @@ class Container {
   // create
   createContainer = async (res, req) => {
     const container = new ContainerEntity(req.body);
-    const [newContainer] = await db("container")
-      .insert(container)
-      .returning("*");
+    const [newContainer] = await basedb.add(`container`, container);
     res.status(201).json({ success: true, container: newContainer });
   };
 
@@ -23,7 +24,7 @@ class Container {
   deleteContainer = async (res, req) => {
     const containerId = req.params.id;
     // get container id
-    const container = await db("container").where("id", containerId).first();
+    const container = await basedb.select(`container`, { id: containerId });
 
     if (!container) {
       return res
@@ -31,7 +32,7 @@ class Container {
         .json({ success: false, error: "container not found" });
     }
     // Delete
-    await db(`container`).where(`id`, containerId).del();
+    await basedb.deleteById(`container`, { id: containerId });
     res.json({ success: true, message: "Container removed" });
   };
 }

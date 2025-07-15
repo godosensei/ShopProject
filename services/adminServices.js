@@ -6,6 +6,7 @@ const db = require(`../db/db.js`);
 const bcrypt = require(`bcrypt`);
 const jwt = require(`jsonwebtoken`);
 const BaseDb = require(`../db/basedb/basedb.js`);
+const basedb = new BaseDb();
 
 const refreshTokens = [];
 const { AdminEntity } = require(`../dto/dto`);
@@ -14,7 +15,7 @@ class Admin {
   constructor() {}
 
   adminSignIn = async (req, res) => {
-    const existingAdmins = await db("Admin").count("* as count");
+    const existingAdmins = await basedb.count(`Admin`);
     const adminCount = parseInt(existingAdmins[0].count);
     // check if admin exist
     if (adminCount > 0) {
@@ -33,7 +34,7 @@ class Admin {
       role: "admin",
     });
 
-    const [newAdmin] = await db("Admin").insert(admin).returning("*");
+    const [newAdmin] = await basedb.add(`Admin`, admin);
 
     res.status(201).json({ success: true, admin: newAdmin });
   };
@@ -42,7 +43,7 @@ class Admin {
     const { name, password } = req.body;
 
     // get user
-    const [user] = await db("Admin").where({ name }).select("*");
+    const [user] = await basedb.select(`Admin`, { name });
 
     if (!user) {
       return res.status(400).send("Admin not found");

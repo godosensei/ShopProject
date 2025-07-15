@@ -6,6 +6,9 @@ const db = require(`../db/db`);
 const bcrypt = require(`bcrypt`);
 const jwt = require(`jsonwebtoken`);
 
+const BaseDb = require(`../db/basedb/basedb.js`);
+const basedb = new BaseDb();
+
 const refreshTokens = [];
 
 const { CustomerEntity } = require(`../dto/dto`);
@@ -27,7 +30,7 @@ class Customer {
       email: req.body.email,
       role: "customer",
     });
-    const [newCustomer] = await db("Customer").insert(customer).returning("*");
+    const [newCustomer] = await basedb.add(`Customer`, customer);
 
     res.status(201).json({ success: true, customer: newCustomer });
   };
@@ -37,7 +40,7 @@ class Customer {
     const { name, password } = req.body;
 
     // get user
-    const [user] = await db("Customer").where({ name }).select("*");
+    const [user] = await basedb.select(`Customer`, { name });
 
     if (!user) {
       return res.status(400).send("User not found");

@@ -4,6 +4,8 @@ const router = express.Router();
 const db = require(`../db/db`);
 const { ProductEntity } = require(`../dto/dto`);
 
+const BaseDb = require(`../db/basedb/basedb.js`);
+const basedb = new BaseDb();
 class Product {
   constructor(req, res) {
     this.req = req;
@@ -13,7 +15,7 @@ class Product {
   createProduct = async (req, res) => {
     const product = new ProductEntity(req.body);
 
-    const [newProduct] = await db("products").insert(product).returning("*");
+    const [newProduct] = await basedb.add(`products`, product);
     const countResult = await db("products")
       .where("container_id", product.container_id)
       .count("* as count");
@@ -35,7 +37,11 @@ class Product {
   getProduct = async (req, res) => {
     const containerId = req.params.id;
 
-    const products = await db("products").where("container_id", containerId);
+    const products = await basedb.select("products", {
+      container_id: containerId,
+    });
+
+    // await db("products").where("container_id", containerId);
 
     res.status(200).json({ success: true, products });
   };
@@ -45,8 +51,9 @@ class Product {
     const productId = req.params.id;
 
     // Get product_id
-    const product = await db("products").where("id", productId).first();
-
+    const product = await basedb.select(`products`, { id: productId });
+    // await db("products").where("id", productId).first();
+    console.log(product);
     if (!product) {
       return res
         .status(404)
@@ -56,18 +63,22 @@ class Product {
     const containerId = product.container_id;
 
     // Delete product
-    await db("products").where("id", productId).del();
+    await basedb.deleteById(`products`, { id: productId });
+    // await db("products").where("id", productId).del();
 
     // Update container product count
-    const countResult = await db("products")
-      .where("container_id", containerId)
-      .count("* as count");
+    const countResult = await basedb.countById("products", {
+      container_id: containerId,
+    });
+    // await db("products").where("container_id", containerId).count("* as count");
 
     const productCount = parseInt(countResult[0].count);
 
-    await db("container")
-      .where("id", containerId)
-      .update({ number_of_products: productCount });
+    basedb.update(`container`, { id: containerId });
+
+    // await db("container")
+    //   .where("id", containerId)
+    //   .update({ number_of_products: productCount });
 
     res.json({ success: true, message: "Product removed" });
   };
