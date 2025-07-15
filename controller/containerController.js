@@ -1,30 +1,34 @@
 //
 const Container = require(`../services/containerServices`);
 const containerservice = new Container();
+const globalError = require(`../error/globalError`);
 //
 class ContainerController {
   //
-  newContainer = async (req, res) => {
+  newContainer = async (req, res, next) => {
     try {
       containerservice.createContainer(res, req);
     } catch (err) {
       console.error("Insert error:", err);
-      res
-        .status(500)
-        .json({ success: false, error: "Failed to add container" });
+      return next(new globalError(`Failed to add container`, 500));
+      // res
+      //   .status(500)
+      //   .json({ success: false, error: "Failed to add container" });
     }
   };
 
   //
 
-  removeContainer = async (req, res) => {
+  removeContainer = async (req, res, next) => {
     try {
-      containerservice.deleteContainer(res, req);
+      containerservice.deleteContainer(res, req, next);
     } catch (err) {
       console.error("Delete error:", err.message);
-      res
-        .status(500)
-        .json({ success: false, error: "Failed to remove container" });
+      return next(new globalError(`Failed to remove container`, 500));
+
+      // res
+      //   .status(500)
+      //   .json({ success: false, error: "Failed to remove container" });
     }
   };
 }

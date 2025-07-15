@@ -13,6 +13,8 @@ const refreshTokens = [];
 
 const { CustomerEntity } = require(`../dto/dto`);
 
+const globalError = require(`../error/globalError.js`);
+
 class Customer {
   //
   constructor(req, res) {
@@ -36,19 +38,23 @@ class Customer {
   };
   //
 
-  customerLogin = async (req, res) => {
+  customerLogin = async (req, res, next) => {
     const { name, password } = req.body;
 
     // get user
     const [user] = await basedb.select(`Customer`, { name });
 
     if (!user) {
-      return res.status(400).send("User not found");
+      return next(new globalError(`User not found`, 400));
+
+      // res.status(400).send("User not found");
     }
 
     // Check password
     const valid = await bcrypt.compare(password, user.password);
-    if (!valid) return res.status(403).send("Invalid password");
+    if (!valid) return next(new globalError(`Invalid password`, 403));
+
+    // res.status(403).send("Invalid password");
 
     res.send(`loged in!`);
   };

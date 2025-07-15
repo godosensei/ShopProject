@@ -6,27 +6,31 @@ const Admin = require(`../services/adminServices`);
 const refreshTokens = [];
 const adminservice = new Admin();
 
+const globalError = require(`../error/globalError.js`);
+
 const { uservalidator } = require(`../validation/validator`);
 
 //
 class AdminController {
   //
-  createAdmin = async (req, res) => {
+  createAdmin = async (req, res, next) => {
     try {
-      adminservice.adminSignIn(req, res);
+      await adminservice.adminSignIn(req, res, next);
     } catch (err) {
       console.error("Admin insert error:", err.message);
-      res.status(500).json({ success: false, error: "Failed to create admin" });
+      // res.status(500).json({ success: false, error: "Failed to create admin" });
+      return next(new globalError(`Failed to create admin`, 500));
     }
   };
 
   //
-  loginAdmin = async (req, res) => {
+  loginAdmin = async (req, res, next) => {
     try {
-      adminservice.adminLogin(req, res);
+      await adminservice.adminLogin(req, res, next);
     } catch (err) {
       console.error("Login error:", err);
-      res.status(500).send("Server error");
+      return next(new globalError(`Server error`, 500));
+      // res.status(500).send("Server error");
     }
   };
 

@@ -10,8 +10,7 @@ class BaseDb {
 
   // COUNT: returns count of all rows
   async count(table) {
-    const result = await db(table).count("* as count");
-    return result[0].count;
+    return await db(table).count("* as count");
   }
 
   // COUNTbyid
@@ -22,9 +21,12 @@ class BaseDb {
 
   // SELECT
   async select(table, where) {
-    return await db(table).where(where).first();
+    return await db(table).where(where).select();
   }
-
+  // SELECT
+  async selectOne(table, where) {
+    return await db(table).where(where).select().first();
+  }
   // UPDATE
   async update(table, where, updateValues) {
     return await db(table).where(where).update(updateValues).returning("*");

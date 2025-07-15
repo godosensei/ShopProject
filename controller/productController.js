@@ -5,6 +5,7 @@ const { ProductEntity } = require(`../dto/dto`);
 const Product = require(`../services/productServices`);
 const productservice = new Product();
 //
+const globalError = require(`../error/globalError.js`);
 
 class ProductController {
   constructor(req, res) {
@@ -13,36 +14,42 @@ class ProductController {
   }
 
   //
-  newProduct = async (req, res) => {
+  newProduct = async (req, res, next) => {
     try {
-      productservice.createProduct(req, res);
+      await productservice.createProduct(req, res);
     } catch (err) {
       console.error("Insert error:", err.message);
-      res.status(500).json({ success: false, error: "Failed to add product" });
+      return next(new globalError(`Failed to add product`, 500));
+
+      // res.status(500).json({ success: false, error: "Failed to add product" });
     }
   };
 
   //
-  getProductByContainer = async (req, res) => {
+  getProductByContainer = async (req, res, next) => {
     try {
-      productservice.getProduct(req, res);
+      await productservice.getProduct(req, res);
     } catch (err) {
       console.error("Fetch error:", err);
-      res
-        .status(500)
-        .json({ success: false, error: "Failed to fetch products" });
+      return next(new globalError(`Failed to fetch products`, 500));
+
+      // res
+      //   .status(500)
+      //   .json({ success: false, error: "Failed to fetch products" });
     }
   };
 
   //
-  removeProduct = async (req, res) => {
+  removeProduct = async (req, res, next) => {
     try {
-      productservice.deleteProduct(req, res);
+      await productservice.deleteProduct(req, res, next);
     } catch (err) {
       console.error("Delete error:", err.message);
-      res
-        .status(500)
-        .json({ success: false, error: "Failed to remove product" });
+      return next(new globalError(`Failed to remove product`, 500));
+
+      // res
+      //   .status(500)
+      //   .json({ success: false, error: "Failed to remove product" });
     }
   };
 }

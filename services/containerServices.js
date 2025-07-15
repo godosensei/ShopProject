@@ -6,7 +6,7 @@ const { ContainerEntity } = require(`../dto/dto`);
 
 const BaseDb = require(`../db/basedb/basedb.js`);
 const basedb = new BaseDb();
-
+const globalError = require(`../error/globalError.js`);
 //
 class Container {
   constructor(req, res) {
@@ -21,15 +21,17 @@ class Container {
   };
 
   // delete
-  deleteContainer = async (res, req) => {
+  deleteContainer = async (res, req, next) => {
     const containerId = req.params.id;
     // get container id
-    const container = await basedb.select(`container`, { id: containerId });
+    const container = await basedb.selectOne(`container`, { id: containerId });
 
+    console.log(container);
     if (!container) {
-      return res
-        .status(404)
-        .json({ success: false, error: "container not found" });
+      return next(new globalError(`container not found`, 404));
+      //  res
+      //   .status(404)
+      //   .json({ success: false, error: "container not found" });
     }
     // Delete
     await basedb.deleteById(`container`, { id: containerId });

@@ -7,6 +7,7 @@ const bcrypt = require(`bcrypt`);
 const jwt = require(`jsonwebtoken`);
 const BaseDb = require(`../db/basedb/basedb.js`);
 const basedb = new BaseDb();
+const globalError = require(`../error/globalError.js`);
 
 const refreshTokens = [];
 const { AdminEntity } = require(`../dto/dto`);
@@ -14,15 +15,17 @@ const { AdminEntity } = require(`../dto/dto`);
 class Admin {
   constructor() {}
 
-  adminSignIn = async (req, res) => {
+  adminSignIn = async (req, res, next) => {
     const existingAdmins = await basedb.count(`Admin`);
     const adminCount = parseInt(existingAdmins[0].count);
     // check if admin exist
     if (adminCount > 0) {
-      return res.status(400).json({
-        success: false,
-        error: "An admin already exists.",
-      });
+      return next(new globalError(`An admin already exists`, 400));
+      // return res.status(400).json({
+      //   success: false,
+      //   error: "An admin already exists.",
+      // }
+      // );
     }
     // create admin if doesnt exist
     const salt = await bcrypt.genSalt();
@@ -39,19 +42,22 @@ class Admin {
     res.status(201).json({ success: true, admin: newAdmin });
   };
 
-  adminLogin = async (req, res) => {
+  adminLogin = async (req, res, next) => {
     const { name, password } = req.body;
 
     // get user
     const [user] = await basedb.select(`Admin`, { name });
 
     if (!user) {
-      return res.status(400).send("Admin not found");
+      return next(new globalError(`Admin not found`, 400));
+      // res.status(400).send("Admin not found");
     }
 
     // Check password
     const valid = await bcrypt.compare(password, user.password);
-    if (!valid) return res.status(403).send("Invalid password");
+    if (!valid) return next(new globalError(`Invalid Password`, 403));
+
+    // res.status(403).send("Invalid password");
 
     // Create JWTs
     const userPayload = { id: user.id, name: user.name };
