@@ -1,40 +1,43 @@
-const db = require(`../db`);
-
 class BaseDb {
-  constructor() {}
-
-  // INSERT: returns inserted row(s)
-  async add(table, dto) {
-    return await db(table).insert(dto).returning("*");
+  constructor(model) {
+    this.model = model;
   }
 
-  // COUNT: returns count of all rows
-  async count(table) {
-    return await db(table).count("* as count");
+  //
+  async add(dto) {
+    const doc = new this.model(dto);
+    return await doc.save();
   }
 
-  // COUNTbyid
-  async countById(table, where) {
-    const result = await db(table).where(where).count("* as count");
-    return result[0].count;
+  // count
+  async count() {
+    return await this.model.countDocuments();
   }
 
-  // SELECT
-  async select(table, where) {
-    return await db(table).where(where).select();
-  }
-  // SELECT
-  async selectOne(table, where) {
-    return await db(table).where(where).select().first();
-  }
-  // UPDATE
-  async update(table, where, updateValues) {
-    return await db(table).where(where).update(updateValues).returning("*");
+  // count by id
+  async countById(where) {
+    return await this.model.countDocuments(where);
   }
 
-  // DELETE
-  async deleteById(table, where) {
-    return await db(table).where(where).del();
+  // select
+  async select(where) {
+    return await this.model.find(where);
+  }
+
+  // select one
+  async selectOne(where) {
+    return await this.model.findOne(where);
+  }
+
+  // update
+  async update(where, updateValues) {
+    await this.model.updateMany(where, updateValues);
+    return await this.model.find(where);
+  }
+
+  // deletebyid
+  async deleteById(where) {
+    return await this.model.deleteMany(where);
   }
 }
 

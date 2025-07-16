@@ -1,10 +1,21 @@
-const express = require(`express`);
+const express = require("express");
+const mongoose = require("mongoose");
+require("dotenv").config();
+
 const app = express();
 
-const ProductRoutes = require(`./router/product`);
-const ContainerRoutes = require(`./router/container`);
-const AdminRoutes = require(`./router/admin`);
-const CustomerRoutes = require(`./router/customer`);
+// Connect to MongoDB
+mongoose
+  .connect(`mongodb://localhost:27017/appdb`)
+  .then(() => console.log("MongoDB connected"))
+  .catch((err) => {
+    console.error("MongoDB connection error:", err);
+  });
+
+const ProductRoutes = require("./router/product");
+const ContainerRoutes = require("./router/container");
+const AdminRoutes = require("./router/admin");
+const CustomerRoutes = require("./router/customer");
 const globalError = require("./error/globalError");
 
 app.use(express.json());

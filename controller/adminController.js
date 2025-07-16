@@ -2,9 +2,9 @@ require(`dotenv`).config();
 
 const express = require(`express`);
 const router = express.Router();
-const Admin = require(`../services/adminServices`);
+const Admins = require(`../services/adminServices`);
 const refreshTokens = [];
-const adminservice = new Admin();
+const adminservice = new Admins();
 
 const globalError = require(`../error/globalError.js`);
 

@@ -1,7 +1,7 @@
 //
 const express = require(`express`);
-const Customer = require(`../services/customerservices`);
-const customerservice = new Customer();
+const Customers = require(`../services/customerservices`);
+const customerservice = new Customers();
 const globalError = require(`../error/globalError.js`);
 
 //

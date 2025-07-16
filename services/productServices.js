@@ -1,32 +1,33 @@
-//
-const express = require(`express`);
-const router = express.Router();
-const db = require(`../db/db`);
+const { Product, Container } = require(`../db/db.js`);
+const BaseDb = require("../db/basedb/basedb.js");
 const { ProductEntity } = require(`../dto/dto`);
-
 const globalError = require(`../error/globalError.js`);
 
-const BaseDb = require(`../db/basedb/basedb.js`);
-const basedb = new BaseDb();
-class Product {
+const productdb = new BaseDb(Product);
+const containerdb = new BaseDb(Container);
+
+class Products {
   constructor(req, res) {
     this.req = req;
     this.res = res;
   }
+
   // create
   createProduct = async (req, res) => {
     const product = new ProductEntity(req.body);
 
-    const [newProduct] = await basedb.add(`products`, product);
-    const countResult = await db("products")
-      .where("container_id", product.container_id)
-      .count("* as count");
+    const newProduct = await productdb.add(product);
 
-    const productCount = parseInt(countResult[0].count);
+    // count products in this container
+    const productCount = await productdb.countById({
+      container_id: product.container_id,
+    });
 
-    await db("container")
-      .where("id", product.container_id)
-      .update({ number_of_products: productCount });
+    // update container's number_of_products
+    await containerdb.update(
+      { _id: product.container_id },
+      { number_of_products: productCount }
+    );
 
     res.status(201).json({
       success: true,
@@ -35,39 +36,36 @@ class Product {
     });
   };
 
-  // Get Product
+  // Get products by container ID
   getProduct = async (req, res) => {
     const containerId = req.params.id;
 
-    const products = await basedb.select("products", {
-      container_id: containerId,
-    });
-
-    // await db("products").where("container_id", containerId);
+    const products = await productdb.select({ container_id: containerId });
 
     res.status(200).json({ success: true, products });
   };
 
-  // delete
+  // delete product
   deleteProduct = async (req, res, next) => {
     const productId = req.params.id;
 
-    const products = await basedb.select("products", { id: productId });
-    if (!products || products.length === 0) {
+    const product = await productdb.selectOne({ _id: productId });
+    if (!product) {
       return next(new globalError("Product not found", 404));
     }
-    const product = products[0];
+
     const containerId = product.container_id;
 
-    await basedb.deleteById("products", { id: productId });
+    await productdb.deleteById({ _id: productId });
 
-    const productCount = await basedb.countById("products", {
+    // Recount products after deletion
+    const productCount = await productdb.countById({
       container_id: containerId,
     });
 
-    await basedb.update(
-      "container",
-      { id: containerId },
+    // Update container's product count
+    await containerdb.update(
+      { _id: containerId },
       { number_of_products: productCount }
     );
 
@@ -75,4 +73,4 @@ class Product {
   };
 }
 
-module.exports = Product;
+module.exports = Products;

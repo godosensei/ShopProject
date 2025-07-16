@@ -10,7 +10,7 @@ const productSchema = Joi.object({
   productType: Joi.string().required(),
   currentProducts: Joi.number().required(),
   totalProducts: Joi.number().required(),
-  containerId: Joi.number().integer().required(),
+  containerId: Joi.string().required(),
 });
 
 const containerSchema = Joi.object({

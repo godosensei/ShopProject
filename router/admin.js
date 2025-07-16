@@ -1,39 +1,31 @@
-require(`dotenv`).config();
+require("dotenv").config();
 
-const {
-  createAdmin,
-  loginAdmin,
-  logoutAdmin,
-  getAdmin,
-} = require(`../controller/adminController`);
-
-const express = require(`express`);
+const express = require("express");
 const router = express.Router();
-const AdminController = require(`../controller/adminController`);
+const jwt = require("jsonwebtoken");
+const AdminController = require("../controller/adminController");
 const controller = new AdminController();
 
-const refreshTokens = [];
+const { uservalidator } = require("../validation/validator");
 
-const { uservalidator } = require(`../validation/validator`);
-
-// Post signin
+//
 router.post("/signin", uservalidator, controller.createAdmin);
 
-// Login
-router.post(`/`, uservalidator, controller.loginAdmin);
+//
+router.post("/login", uservalidator, controller.loginAdmin);
 
-// Logout
-router.delete(`/`, controller.logoutAdmin);
+//
+router.delete("/logout", controller.logoutAdmin);
 
-// get
-router.get(`/`, authenticateToken, controller.getAdmin);
+//
+router.get("/me", authenticateToken, controller.getAdmin);
 
 //
 function authenticateToken(req, res, next) {
   const authHeader = req.headers["authorization"];
   const token = authHeader && authHeader.split(" ")[1];
 
-  if (token == null) return res.sendStatus(401);
+  if (!token) return res.sendStatus(401);
 
   jwt.verify(token, process.env.ACCESS_TOKEN, (err, user) => {
     if (err) return res.sendStatus(403);

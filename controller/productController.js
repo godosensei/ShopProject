@@ -2,8 +2,8 @@
 const db = require(`../db/db`);
 const { ProductEntity } = require(`../dto/dto`);
 
-const Product = require(`../services/productServices`);
-const productservice = new Product();
+const Products = require(`../services/productServices`);
+const productservice = new Products();
 //
 const globalError = require(`../error/globalError.js`);
 

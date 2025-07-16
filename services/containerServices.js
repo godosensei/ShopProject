@@ -1,42 +1,41 @@
-//
-const express = require(`express`);
-const router = express.Router();
-const db = require(`../db/db`);
 const { ContainerEntity } = require(`../dto/dto`);
-
-const BaseDb = require(`../db/basedb/basedb.js`);
-const basedb = new BaseDb();
+const { Container } = require(`../db/db.js`);
+const BaseDb = require("../db/basedb/basedb.js");
+const basedb = new BaseDb(Container);
 const globalError = require(`../error/globalError.js`);
-//
-class Container {
-  constructor(req, res) {
-    this.req = req;
-    this.res = res;
-  }
+const mongoose = require("mongoose");
+
+class Containers {
   // create
-  createContainer = async (res, req) => {
-    const container = new ContainerEntity(req.body);
-    const [newContainer] = await basedb.add(`container`, container);
-    res.status(201).json({ success: true, container: newContainer });
+  createContainer = async (req, res, next) => {
+    try {
+      const container = new ContainerEntity(req.body);
+      const newContainer = await basedb.add(container);
+      res.status(201).json({ success: true, container: newContainer });
+    } catch (err) {
+      next(err);
+    }
   };
 
   // delete
-  deleteContainer = async (res, req, next) => {
-    const containerId = req.params.id;
-    // get container id
-    const container = await basedb.selectOne(`container`, { id: containerId });
+  deleteContainer = async (req, res, next) => {
+    try {
+      const containerId = req.params.id;
+      if (!mongoose.Types.ObjectId.isValid(containerId)) {
+        return next(new globalError("Invalid container ID", 400));
+      }
 
-    console.log(container);
-    if (!container) {
-      return next(new globalError(`container not found`, 404));
-      //  res
-      //   .status(404)
-      //   .json({ success: false, error: "container not found" });
+      const container = await basedb.selectOne({ _id: containerId });
+      if (!container) {
+        return next(new globalError(`Container not found`, 404));
+      }
+
+      await basedb.deleteById({ _id: containerId });
+      res.json({ success: true, message: "Container removed" });
+    } catch (err) {
+      next(err);
     }
-    // Delete
-    await basedb.deleteById(`container`, { id: containerId });
-    res.json({ success: true, message: "Container removed" });
   };
 }
 
-module.exports = Container;
+module.exports = Containers;

@@ -6,8 +6,9 @@ const db = require(`../db/db`);
 const bcrypt = require(`bcrypt`);
 const jwt = require(`jsonwebtoken`);
 
-const BaseDb = require(`../db/basedb/basedb.js`);
-const basedb = new BaseDb();
+const { Customer } = require(`../db/db.js`);
+const BaseDb = require("../db/basedb/basedb.js");
+const basedb = new BaseDb(Customer);
 
 const refreshTokens = [];
 
@@ -15,7 +16,7 @@ const { CustomerEntity } = require(`../dto/dto`);
 
 const globalError = require(`../error/globalError.js`);
 
-class Customer {
+class Customers {
   //
   constructor(req, res) {
     this.req = req;
@@ -32,7 +33,7 @@ class Customer {
       email: req.body.email,
       role: "customer",
     });
-    const [newCustomer] = await basedb.add(`Customer`, customer);
+    const newCustomer = await basedb.add(customer);
 
     res.status(201).json({ success: true, customer: newCustomer });
   };
@@ -42,7 +43,7 @@ class Customer {
     const { name, password } = req.body;
 
     // get user
-    const [user] = await basedb.select(`Customer`, { name });
+    const user = await basedb.selectOne({ name });
 
     if (!user) {
       return next(new globalError(`User not found`, 400));
@@ -60,4 +61,4 @@ class Customer {
   };
 }
 
-module.exports = Customer;
+module.exports = Customers;
