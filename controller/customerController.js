@@ -27,6 +27,16 @@ class CustomerController {
       return next(new globalError(`Server Error`, 500));
     }
   };
+
+  //
+  buyProduct = (req, res, next) => {
+    try {
+      customerservice.getProducts(req, res, next);
+    } catch (err) {
+      console.log(err);
+      next(err);
+    }
+  };
 }
 
 module.exports = CustomerController;

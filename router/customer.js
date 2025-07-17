@@ -11,4 +11,7 @@ router.post("/signin", uservalidator, controller.createCustomer);
 // Login
 router.post(`/`, uservalidator, controller.Logincustomer);
 
+// Buy
+router.put(`/`, controller.buyProduct);
+
 module.exports = router;

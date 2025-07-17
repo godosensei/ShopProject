@@ -9,7 +9,7 @@ const { productvalidator } = require(`../validation/validator`);
 router.post("/", productvalidator, controller.newProduct);
 
 // Get products
-router.get("/:id", controller.getProductByContainer);
+router.get("/:id/:page", controller.getProductByContainer);
 
 // Delete products
 router.delete("/:id", controller.removeProduct);

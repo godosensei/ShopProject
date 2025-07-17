@@ -18,6 +18,7 @@ class ProductEntity {
     // this.number_of_products = data. data.numberOfProducts
     this.product_type = data.productType;
     this.current_products = data.currentProducts;
+    this.sold_products = data.soldProducts;
     this.total_products = data.totalProducts;
     this.container_id = data.containerId;
     this.deleted_at = data.deletedAt;

@@ -17,10 +17,7 @@ const globalError = require(`../error/globalError.js`);
 
 class Customer {
   //
-  constructor(req, res) {
-    this.req = req;
-    this.res = res;
-  }
+  constructor() {}
 
   //
   customerSignin = async (req, res) => {
@@ -62,6 +59,50 @@ class Customer {
 
     res.send(`${user.name} loged in!`);
   };
+
+  //
+  getProducts = async (req, res, next) => {
+    try {
+      const id = req.body.id;
+      const amount = req.body.amount;
+
+      const product = await basedb.selectOne("products", { id });
+
+      if (!product) {
+        return next(new globalError(`Product not found`, 404));
+      }
+
+      const sold = product.sold_products + amount;
+      const current = product.total_products - sold;
+
+      if (product.current_products <= 0) {
+        return res.send(`!Sold`);
+      }
+
+      const [updatedProduct] = await basedb.update(
+        `products`,
+        { id },
+        { sold_products: sold, current_products: current }
+      );
+      //  await db("products")
+      //   .where({ id })
+      //   .update({
+      //     sold_products: sold,
+      //     current_products: product,
+      // })
+      // .returning("*");
+
+      res.status(200).json({
+        success: true,
+        product: updatedProduct,
+        message: `${amount} Product(s) sold.`,
+      });
+    } catch (err) {
+      console.error(err);
+      next(err);
+    }
+  };
 }
 
+//
 module.exports = Customer;

@@ -21,6 +21,7 @@ exports.up = async function (knex) {
     table.increments(`id`).primary();
     table.string(`product_type`);
     table.integer(`current_products`);
+    table.integer(`sold_products`);
     table.integer(`total_products`);
     table.timestamps(true, true);
     table.string(`deleted_at`);

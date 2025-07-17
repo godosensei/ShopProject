@@ -22,6 +22,8 @@ class Product {
       return next(new globalError("Container already deleted", 400));
     }
 
+    product.current_products = product.total_products - product.sold_products;
+
     const [newProduct] = await basedb.add(`products`, product);
 
     await db(`container`)
@@ -43,9 +45,16 @@ class Product {
       const products = await basedb.select(`products`, {
         container_id: containerId,
       });
-      console.log(products);
+      const totalElems = products.length;
+      const take = 2;
+      const page = req.params.page;
+      let skip = Math.max(0, take * (page - 1));
+      const totalPages = Math.ceil(totalElems / take);
+      const items = products.slice(skip, skip + take);
 
-      res.status(200).json({ success: true, products });
+      console.log(items);
+
+      res.status(200).json({ success: true, items });
     } catch (err) {
       console.log(err);
       next(err);

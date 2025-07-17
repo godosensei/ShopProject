@@ -8,7 +8,7 @@ const userSchema = Joi.object({
 
 const productSchema = Joi.object({
   productType: Joi.string().required(),
-  currentProducts: Joi.number().required(),
+  soldProducts: Joi.number().required(),
   totalProducts: Joi.number().required(),
   containerId: Joi.number().integer().required(),
 });

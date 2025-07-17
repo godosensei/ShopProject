@@ -26,11 +26,37 @@ class Container {
   };
 
   // read
+  // pagination
+  // pagination(take, page) {
+  //   const totalElems = elements.length;
+  //   let skip = Math.max(0, take * (page - 1));
+  //   const totalPages = Math.ceil(totalElems / take);
+  //   const items = elements.slice(skip, skip + take);
+  //   let remainingPages = totalPages - page;
+
+  //   return {
+  //     totalElements: totalElems,
+  //     take: take,
+  //     currentPage: Math.max(1, page),
+  //     totalPages: totalPages,
+  //     remainingPages: Math.max(remainingPages, 0),
+  //     skip: skip,
+  //     itemsOnCurrPage: items,
+  //   };
+  // }
+  //
   readContainer = async (req, res, next) => {
     try {
       const containers = await basedb.select("container");
-      console.log(containers);
-      res.json({ containers });
+      const totalElems = containers.length;
+      const take = 2;
+      const page = req.params.page;
+      let skip = Math.max(0, take * (page - 1));
+      const totalPages = Math.ceil(totalElems / take);
+      const items = containers.slice(skip, skip + take);
+
+      console.log(items);
+      res.json({ items });
     } catch (err) {
       console.log(err);
       next(err);
