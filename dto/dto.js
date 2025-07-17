@@ -6,7 +6,9 @@ class ContainerEntity {
     this.number_of_products = data.numberOfProducts;
     this.container_number = data.containerNumber;
     this.dilivered_from = data.diliveredFrom;
+    this.dilivered_at = data.diliveredAt;
     this.means_of_transport = data.meansOfTransport;
+    this.deleted_at = data.deletedAt;
   }
 }
 
@@ -18,6 +20,7 @@ class ProductEntity {
     this.current_products = data.currentProducts;
     this.total_products = data.totalProducts;
     this.container_id = data.containerId;
+    this.deleted_at = data.deletedAt;
   }
 }
 
@@ -38,6 +41,7 @@ class CustomerEntity {
     this.password = data.password;
     this.email = data.email;
     this.role = data.role;
+    this.deleted_at = data.deletedAt;
   }
 }
 

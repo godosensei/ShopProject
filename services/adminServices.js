@@ -16,37 +16,37 @@ class Admin {
   constructor() {}
 
   adminSignIn = async (req, res, next) => {
-    const existingAdmins = await basedb.count(`Admin`);
-    const adminCount = parseInt(existingAdmins[0].count);
-    // check if admin exist
-    if (adminCount > 0) {
-      return next(new globalError(`An admin already exists`, 400));
-      // return res.status(400).json({
-      //   success: false,
-      //   error: "An admin already exists.",
-      // }
-      // );
+    try {
+      const existingAdmins = await basedb.count(`admin`);
+      const adminCount = parseInt(existingAdmins);
+      // check if admin exist
+      if (adminCount > 0) {
+        return next(new globalError(`An admin already exists`, 400));
+      }
+      // create admin if doesnt exist
+      const salt = await bcrypt.genSalt();
+      const hashedPassword = await bcrypt.hash(req.body.password, salt);
+      const admin = new AdminEntity({
+        name: req.body.name,
+        password: hashedPassword,
+        email: req.body.email,
+        role: "admin",
+      });
+
+      const [newAdmin] = await basedb.add(`admin`, admin);
+
+      res.status(201).json({ success: true, admin: newAdmin.name });
+    } catch (err) {
+      console.log(err);
+      next(err);
     }
-    // create admin if doesnt exist
-    const salt = await bcrypt.genSalt();
-    const hashedPassword = await bcrypt.hash(req.body.password, salt);
-    const admin = new AdminEntity({
-      name: req.body.name,
-      password: hashedPassword,
-      email: req.body.email,
-      role: "admin",
-    });
-
-    const [newAdmin] = await basedb.add(`Admin`, admin);
-
-    res.status(201).json({ success: true, admin: newAdmin });
   };
 
   adminLogin = async (req, res, next) => {
     const { name, password } = req.body;
 
     // get user
-    const [user] = await basedb.select(`Admin`, { name });
+    const user = await basedb.selectOne(`admin`, { name });
 
     if (!user) {
       return next(new globalError(`Admin not found`, 400));

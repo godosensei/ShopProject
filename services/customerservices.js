@@ -32,9 +32,13 @@ class Customer {
       email: req.body.email,
       role: "customer",
     });
-    const [newCustomer] = await basedb.add(`Customer`, customer);
+    const [newCustomer] = await basedb.add(`customer`, customer);
 
-    res.status(201).json({ success: true, customer: newCustomer });
+    res.status(201).json({
+      success: true,
+      name: newCustomer.name,
+      email: newCustomer.email,
+    });
   };
   //
 
@@ -42,7 +46,7 @@ class Customer {
     const { name, password } = req.body;
 
     // get user
-    const [user] = await basedb.select(`Customer`, { name });
+    const [user] = await basedb.select(`customer`, { name });
 
     if (!user) {
       return next(new globalError(`User not found`, 400));
@@ -56,7 +60,7 @@ class Customer {
 
     // res.status(403).send("Invalid password");
 
-    res.send(`loged in!`);
+    res.send(`${user.name} loged in!`);
   };
 }
 

@@ -1,40 +1,57 @@
-const db = require(`../db`);
+const db = require("../db"); // Your knex instance
 
 class BaseDb {
   constructor() {}
 
-  // INSERT: returns inserted row(s)
   async add(table, dto) {
     return await db(table).insert(dto).returning("*");
   }
 
-  // COUNT: returns count of all rows
   async count(table) {
-    return await db(table).count("* as count");
-  }
-
-  // COUNTbyid
-  async countById(table, where) {
-    const result = await db(table).where(where).count("* as count");
+    const result = await db(table).count("* as count");
     return result[0].count;
   }
 
-  // SELECT
-  async select(table, where) {
-    return await db(table).where(where).select();
-  }
-  // SELECT
-  async selectOne(table, where) {
-    return await db(table).where(where).select().first();
-  }
-  // UPDATE
-  async update(table, where, updateValues) {
-    return await db(table).where(where).update(updateValues).returning("*");
+  async countById(table, where) {
+    const result = await db(table)
+      .where({ ...where, deleted_at: null })
+      .count("* as count");
+    return result[0].count;
   }
 
-  // DELETE
+  async select(table, where) {
+    return await db(table).where({ ...where, deleted_at: null });
+  }
+
+  async selectOne(table, where) {
+    return await db(table)
+      .where({ ...where, deleted_at: null })
+      .first();
+  }
+
+  async update(table, where, updateValues) {
+    return await db(table)
+      .where({ ...where, deleted_at: null })
+      .update(updateValues)
+      .returning("*");
+  }
+
   async deleteById(table, where) {
-    return await db(table).where(where).del();
+    return await db(table)
+      .where({ ...where, deleted_at: null })
+      .del();
+  }
+
+  async alreadyDeleted(table, where, select) {
+    const row = await db(table)
+      .select(select)
+      .where({ ...where, deleted_at: null })
+      .first();
+
+    if (!row) {
+      throw new Error("Not Found");
+    }
+    return row[select] !== null;
   }
 }
 

@@ -16,7 +16,7 @@ class ProductController {
   //
   newProduct = async (req, res, next) => {
     try {
-      await productservice.createProduct(req, res);
+      await productservice.createProduct(req, res, next);
     } catch (err) {
       console.error("Insert error:", err.message);
       return next(new globalError(`Failed to add product`, 500));
@@ -28,9 +28,9 @@ class ProductController {
   //
   getProductByContainer = async (req, res, next) => {
     try {
-      await productservice.getProduct(req, res);
+      await productservice.getProduct(req, res, next);
     } catch (err) {
-      console.error("Fetch error:", err);
+      console.error(err);
       return next(new globalError(`Failed to fetch products`, 500));
 
       // res

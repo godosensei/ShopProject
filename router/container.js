@@ -11,4 +11,7 @@ router.post("/", containerValidator, controller.newContainer);
 // Delete container
 router.delete(`/:id`, containerValidator, controller.removeContainer);
 
+// Get
+router.get(`/`, controller.getContainers);
+
 module.exports = router;

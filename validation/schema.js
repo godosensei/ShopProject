@@ -16,6 +16,7 @@ const productSchema = Joi.object({
 const containerSchema = Joi.object({
   containerNumber: Joi.number().required(),
   diliveredFrom: Joi.string().required(),
+  diliveredAt: Joi.date().required(),
   meansOfTransport: Joi.string().required(),
 });
 

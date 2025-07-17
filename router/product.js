@@ -12,6 +12,6 @@ router.post("/", productvalidator, controller.newProduct);
 router.get("/:id", controller.getProductByContainer);
 
 // Delete products
-router.delete("/:id", productvalidator, controller.removeProduct);
+router.delete("/:id", controller.removeProduct);
 
 module.exports = router;

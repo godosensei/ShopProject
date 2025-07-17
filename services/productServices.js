@@ -9,67 +9,88 @@ const globalError = require(`../error/globalError.js`);
 const BaseDb = require(`../db/basedb/basedb.js`);
 const basedb = new BaseDb();
 class Product {
-  constructor(req, res) {
-    this.req = req;
-    this.res = res;
-  }
+  constructor() {}
   // create
-  createProduct = async (req, res) => {
+  createProduct = async (req, res, next) => {
     const product = new ProductEntity(req.body);
+    const container = await basedb.selectOne(`container`, {
+      id: product.container_id,
+    });
+    console.log(container);
+
+    if (!container) {
+      return next(new globalError("Container already deleted", 400));
+    }
 
     const [newProduct] = await basedb.add(`products`, product);
-    const countResult = await db("products")
-      .where("container_id", product.container_id)
-      .count("* as count");
 
-    const productCount = parseInt(countResult[0].count);
-
-    await db("container")
+    await db(`container`)
       .where("id", product.container_id)
-      .update({ number_of_products: productCount });
+      .update({ number_of_products: container.number_of_products + 1 });
 
     res.status(201).json({
       success: true,
       product: newProduct,
-      message: `Container ${product.container_id} now has ${productCount} product(s).`,
+      message: `Container ${product.container_id} now has ${container.number_of_products} product(s).`,
     });
   };
 
   // Get Product
-  getProduct = async (req, res) => {
-    const containerId = req.params.id;
+  getProduct = async (req, res, next) => {
+    try {
+      const containerId = req.params.id;
 
-    const products = await basedb.select("products", {
-      container_id: containerId,
-    });
+      const products = await basedb.select(`products`, {
+        container_id: containerId,
+      });
+      console.log(products);
 
-    // await db("products").where("container_id", containerId);
-
-    res.status(200).json({ success: true, products });
+      res.status(200).json({ success: true, products });
+    } catch (err) {
+      console.log(err);
+      next(err);
+    }
   };
 
   // delete
   deleteProduct = async (req, res, next) => {
     const productId = req.params.id;
 
-    const products = await basedb.select("products", { id: productId });
-    if (!products || products.length === 0) {
-      return next(new globalError("Product not found", 404));
-    }
-    const product = products[0];
-    const containerId = product.container_id;
-
-    await basedb.deleteById("products", { id: productId });
-
-    const productCount = await basedb.countById("products", {
-      container_id: containerId,
+    const product = await basedb.selectOne(`products`, {
+      id: productId,
     });
+    if (!product) {
+      return next(new globalError(`Product not found`, 404));
+    }
 
-    await basedb.update(
-      "container",
-      { id: containerId },
-      { number_of_products: productCount }
+    const deleteDate = new Date(); // current timestamp
+
+    basedb.alreadyDeleted(`products`, { id: productId }, `deleted_at`);
+    // Soft delete by updating `deleted_at` field
+    const updated = await basedb.update(
+      `products`,
+      { id: productId },
+      { deleted_at: deleteDate }
     );
+
+    // const products = await basedb.select(`products`, { id: productId });
+    // if (!products || products.length === 0) {
+    //   return next(new globalError("Product not found", 404));
+    // }
+    // const product = products[0];
+    // const containerId = product.container_id;
+
+    // await basedb.deleteById(`products`, { id: productId });
+
+    // const productCount = await basedb.countById(`products`, {
+    //   container_id: containerId,
+    // });
+
+    // await basedb.update(
+    //   `container`,
+    //   { id: containerId },
+    //   { number_of_products: productCount }
+    // );
 
     res.json({ success: true, message: "Product removed" });
   };
