@@ -78,4 +78,4 @@ function pagination(take, page) {
   };
 }
 
-console.log(pagination(5, 6));
+console.log(pagination(5, 2));
